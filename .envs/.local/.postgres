@@ -1,0 +1,7 @@
+# PostgreSQL
+# ------------------------------------------------------------------------------
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=wefocus
+POSTGRES_USER=prkcGxXUCBmkVPLgrcmuOLUkRYDlyJlR
+POSTGRES_PASSWORD=DQeZkMZBTMkwktkqLQgOfNe4a12QCcePfkIn1eKB1rsj5xtH7WVSbB89AHX2IUdY
