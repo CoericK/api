@@ -39,7 +39,7 @@ class PartyManger:
             try:
                 PartyMember.objects.get(party_id=party.id, user_id=user_id, active=True)
             except PartyMember.DoesNotExist:
-                raise InvalidMember()
+                party = None
 
         members = None
         if not shallow and party:
@@ -105,11 +105,11 @@ class PartyManger:
 
         # TODO: atomic lock on party
         try:
-            member = PartyMember.objects.get(party_id=party_id, user_id=user_id, active=True)
+            member = PartyMember.objects.get(party_id=party.id, user_id=user_id, active=True)
         except PartyMember.DoesNotExist:
             raise InvalidMember()
 
-        if member.last_left_at > member.last_joined_at:
+        if member.last_left_at is not None and member.last_left_at > member.last_joined_at:
             raise InvalidMember()
 
         member.last_left_at = current_time

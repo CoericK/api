@@ -94,7 +94,7 @@ class PartyViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, UpdateM
                                break_duration=request.data.get('break_duration'),
                                )
 
-    @action(detail=False, methods=["DELETE"])
+    @action(detail=False, methods=["POST"])
     @permission_classes([permissions.IsAuthenticated])
     def end_pomodoro_timer(self, request):
         return handle_response(PartyManger().end_pomodoro_timer,

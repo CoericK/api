@@ -38,11 +38,11 @@ class PomodoroTimerManager(BaseTimerManager):
 
 
 class PomodoroTimer(BaseTimer):
-    focus_starts_at = models.IntegerField()
-    focus_ends_at = models.IntegerField()
+    focus_starts_at = models.DateTimeField()
+    focus_ends_at = models.DateTimeField()
 
-    break_starts_at = models.IntegerField()
-    break_ends_at = models.IntegerField()
+    break_starts_at = models.DateTimeField()
+    break_ends_at = models.DateTimeField()
 
     objects = PomodoroTimerManager()
 

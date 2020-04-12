@@ -20,7 +20,7 @@ class PartyManager(models.Manager):
 
     def discard(self, party_id):
         PartyMember.objects.filter(active=True, party_id=party_id).update(active=False)
-        PomodoroTimer.objects.filter(active=True, wner_type=TimerOwnerType.PARTY, owner_id=party_id)\
+        PomodoroTimer.objects.filter(active=True, owner_type=TimerOwnerType.PARTY, owner_id=party_id)\
                              .update(active=False)
         self.filter(id=party_id).update(active=False)
 

@@ -36,6 +36,6 @@ class TimerManager:
     def end_pomodoro_timer(self, owner_type, owner_id):
         timer = self.get_current_pomodoro_timer(owner_type=owner_type, owner_id=owner_id)
         if timer:
-            PomodoroTimer.objects.discard(id=timer.id)
+            PomodoroTimer.objects.discard(timer_id=timer.id)
 
         return timer
