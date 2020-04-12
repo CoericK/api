@@ -12,8 +12,8 @@ class PartyManager(models.Manager):
             created_at=created_at,
         )
 
-    def discard(self):
-        self.filter(id=self.id).update(active=False)
+    def discard(self, party_id):
+        self.filter(id=party_id).update(active=False)
 
 
 class Party(models.Model):
