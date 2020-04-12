@@ -15,14 +15,14 @@ class PartyManager(models.Manager):
         party = self.create(slug=slug, host_user_id=host_user_id,
                             updated_at=created_at, created_at=created_at)
         PartyMember.objects.create_member(party_id=party.id, user_id=host_user_id,
-                                          role=PartyMemberRole.HOST, joined_at=created_at)
+                                          role=PartyMemberRole.HOST, last_joined_at=created_at)
         return party
 
     def discard(self, party_id):
-        self.filter(id=party_id).update(active=False)
         PartyMember.objects.filter(active=True, party_id=party_id).update(active=False)
         PomodoroTimer.objects.filter(active=True, wner_type=TimerOwnerType.PARTY, owner_id=party_id)\
                              .update(active=False)
+        self.filter(id=party_id).update(active=False)
 
 
 class Party(models.Model):
@@ -32,6 +32,8 @@ class Party(models.Model):
 
     updated_at = models.DateTimeField()
     created_at = models.DateTimeField()
+
+    max_member_count = models.IntegerField(default=6)   # TODO: get from a config value
 
     active = models.BooleanField(default=True)
 
@@ -44,8 +46,8 @@ class Party(models.Model):
 
 class PartyMemberManager(models.Manager):
 
-    def create_member(self, party_id, user_id, role, joined_at):
-        member = self.create(party_id=party_id, user_id=user_id, role=role, joined_at=joined_at)
+    def create_member(self, party_id, user_id, role, last_joined_at):
+        member = self.create(party_id=party_id, user_id=user_id, role=role, last_joined_at=last_joined_at)
         return member
 
 
@@ -55,8 +57,8 @@ class PartyMember(models.Model):
 
     role = models.IntegerField()
 
-    joined_at = models.DateTimeField()
-    left_at = models.DateTimeField(default=None)
+    last_joined_at = models.DateTimeField()
+    last_left_at = models.DateTimeField(default=None)
 
     active = models.BooleanField(default=True)
 
@@ -64,5 +66,6 @@ class PartyMember(models.Model):
 
     class Meta:
         verbose_name_plural = 'party_members'
-        unique_together = ['active', 'party_id', 'user_id']
+        unique_together = [['active', 'party_id', 'user_id']]
+        index_together = [['user_id', 'active']]
 
