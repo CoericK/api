@@ -130,8 +130,15 @@ INSTALLED_APPS += ["anymail"]  # noqa F405
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-backend
 # https://anymail.readthedocs.io/en/stable/installation/#anymail-settings-reference
 # https://anymail.readthedocs.io/en/stable/esps/amazon_ses/
-EMAIL_BACKEND = "anymail.backends.amazon_ses.EmailBackend"
-ANYMAIL = {}
+EMAIL_BACKEND = "anymail.backends.sendgrid.EmailBackend"
+ANYMAIL = {
+    'SENDGRID_API_KEY': env('SENDGRID_API_KEY'),
+    'SEND_DEFAULTS': {
+        'from_email': DEFAULT_FROM_EMAIL,
+        'track_opens': True,
+    },
+    # 'WEBHOOK_SECRET': env.list('ANYMAIL_WEBHOOK_SECRET'),
+}
 
 # django-compressor
 # ------------------------------------------------------------------------------
