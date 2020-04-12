@@ -11,7 +11,9 @@ class PartyMemberRole:
 
 class PartyManager(models.Manager):
 
-    def create_party(self, host_user_id, created_at, slug=uuid.uuid4()):
+    def create_party(self, host_user_id, created_at, slug=None):
+        if not slug:
+            slug = uuid.uuid4()
         party = self.create(slug=slug, host_user_id=host_user_id,
                             updated_at=created_at, created_at=created_at)
         PartyMember.objects.create_member(party_id=party.id, user_id=host_user_id,
