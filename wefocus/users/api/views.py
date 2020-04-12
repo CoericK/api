@@ -7,7 +7,7 @@ from rest_framework.viewsets import GenericViewSet
 from django.utils.crypto import get_random_string
 
 from .serializers import UserSerializer
-from dj_rest_auth.registration import views
+from rest_framework.authtoken.models import Token
 
 User = get_user_model()
 
@@ -33,6 +33,9 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
             random_username = get_random_string(length=32)
             print(random_username)
             user = User.objects.create(username=random_username, is_temporary=True)
+            login(request, user, backend='allauth.account.auth_backends.AuthenticationBackend')
             serializer = UserSerializer(request.user, context={"request": request})
-            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            return Response(status=status.HTTP_200_OK, data=serializer.data)
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({
+                'token': token.key,
+            }, status=status.HTTP_201_CREATED)
