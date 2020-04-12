@@ -1,6 +1,8 @@
 import datetime
 import uuid
 
+from django.db.models import F
+
 from .models import Party, PartyMember, PartyMemberRole
 from wefocus.apps.timer.models import TimerOwnerType
 
@@ -12,6 +14,9 @@ from .exceptions import InvalidHost, InvalidParty, InvalidMember, AlreadyInAPart
 class PartyManger:
 
     def create_party(self, host_user_id):
+        if PartyMember.objects.filter(user_id=user_id, active=True).count() > 0:
+            raise AlreadyInAParty()
+
         time = datetime.datetime.now().replace(microsecond=0)
         party = Party.objects.create_party(
             host_user_id=host_user_id,
@@ -21,7 +26,7 @@ class PartyManger:
 
         return self.get_party_view(user_id=host_user_id, party_slug=party.slug)
 
-    def get_party_view(self, user_id, party_slug, party=None):
+    def get_party_view(self, user_id, party_slug, party=None, shallow=False):
         party = party or self._get_party_safe(party_slug=party_slug)
 
         try:
@@ -31,7 +36,7 @@ class PartyManger:
 
         timer = None
         members = []
-        if party:
+        if not shallow and party:
             timer_manager = TimerManager()
             timer = timer_manager.get_current_pomodoro_timer(owner_type=TimerOwnerType.PARTY, owner_id=party.id)
 
@@ -39,13 +44,19 @@ class PartyManger:
 
         return None  # the view
 
+    def get_parties(self):
+        parties = Party.objects.filter(active=True, member_count__lt=F('max_member_count'))[:50]    # TODO: get from config
+        party_views = [self.get_party_view(user_id=party.host_user_id, party_slug=party.slug, shallow=True)
+                       for party in parties]
+
+        return party_views
+
     def join_party(self, user_id, party_slug):
         party = self._validate_party(party_slug=party_slug)
         current_time = datetime.datetime.now().replace(microsecond=0)
 
         # TODO: atomic lock on party
-        active_members_of_this_party = PartyMember.objects.filter(party_id=party, active=True)
-        if active_members_of_this_party.count() >= party.max_member_count:
+        if party.member_count >= party.max_member_count:
             raise PartyFull()
 
         active_members_of_this_user = PartyMember.objects.filter(user_id=user_id, active=True)
@@ -67,6 +78,8 @@ class PartyManger:
 
         PartyMember.objects.create_member(party_id=party.id, user_id=user_id,
                                           role=PartyMemberRole.USER, last_joined_at=current_time)
+        party.member_count += 1
+        party.save()
 
         return self.get_party_view(user_id=user_id, party_slug=party_slug, party=party)
 
@@ -88,6 +101,9 @@ class PartyManger:
 
         if member.user_id == party.host_user_id:
             Party.objects.discard(party_id=party.id)
+        else:
+            party.member_count -= 1
+            party.save()
 
         # client will not render the party UI if the party member list in the response does not include the user
         return self.get_party_view(user_id=user_id, party_slug=party_slug, party=party)

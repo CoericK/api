@@ -33,6 +33,7 @@ class Party(models.Model):
     updated_at = models.DateTimeField()
     created_at = models.DateTimeField()
 
+    member_count = models.IntegerField(default=1)
     max_member_count = models.IntegerField(default=6)   # TODO: get from a config value
 
     active = models.BooleanField(default=True)
@@ -41,7 +42,10 @@ class Party(models.Model):
 
     class Meta:
         verbose_name_plural = 'parties'
-        unique_together = ['jitsi_id', 'slug']
+        unique_together = ['jitsi_id',
+                           'slug']
+        index_together = [['active', 'host_user_id'],
+                          ['active', 'member_count', 'max_member_count']]
 
 
 class PartyMemberManager(models.Manager):
