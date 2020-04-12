@@ -14,12 +14,3 @@ class PartyMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = PartyMember
         fields = ['user_id']
-
-
-class PartyViewSerializer(serializers.Serializer):
-    party = PartySerializer(read_only=True)
-    timer = PomodoroTimerSerializer(read_only=True)
-    members = PartyMemberSerializer(read_only=True, many=True)
-
-
-

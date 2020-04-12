@@ -14,6 +14,9 @@ from .exceptions import InvalidHost, InvalidParty, InvalidMember, AlreadyInAPart
 from .serializers import PartyViewSerializer
 
 
+from .serializers import PartySerializer, PartyMemberSerializer
+from wefocus.apps.timer.serializers import PomodoroTimerSerializer
+
 
 class PartyManger:
 
@@ -37,7 +40,7 @@ class PartyManger:
         except PartyMember.DoesNotExist:
             raise InvalidMember()
 
-        members = []
+        members = None
         if not shallow and party:
             timer_manager = TimerManager()
             timer = timer or timer_manager.get_current_pomodoro_timer(owner_type=TimerOwnerType.PARTY,
@@ -45,19 +48,26 @@ class PartyManger:
 
             members = PartyMember.objects.filter(party_id=party.id, active=True)
 
-        serializer = PartyViewSerializer({
-            'party': party,
-            'timer': timer,
-            'members': members,
-        })
-        return Response(status=status.HTTP_200_OK, data=serializer.data)  # the view
+        party_view = PartySerializer(party)
+        members_view = PartyMemberSerializer(members, many=True)
+        timer_view = PomodoroTimerSerializer(timer)
+
+        response_data = {
+            'party': party_view.data,
+            'members': members_view.data,
+            'timer': timer_view.data,
+        }
+        return Response(status=status.HTTP_200_OK, data=response_data)
 
     def get_parties(self):
         parties = Party.objects.filter(active=True, member_count__lt=F('max_member_count'))[:50]  # TODO: get from config
-        party_views = [self.get_party_view(user_id=party.host_user_id, party_slug=party.slug, shallow=True)
-                       for party in parties]
+        parties_view = PartySerializer(parties, many=True)
 
-        return party_views
+        response_data = {
+            'parties': parties_view.data,
+        }
+
+        return Response(status=status.HTTP_200_OK, data=response_data)
 
     def join_party(self, user_id, party_slug):
         party = self._validate_party(party_slug=party_slug)
@@ -90,6 +100,15 @@ class PartyManger:
         party.save()
 
         return self.get_party_view(user_id=user_id, party_slug=party_slug, party=party)
+
+    def delete_party(self, party_slug):
+        # TEMPORARY METHOD
+        party_ids = [Party.objects.filter(slug=party_slug).values_list('id', flat=True)]
+        Party.objects.filter(slug=party_slug).update(active=False)
+        PartyMember.objects.filter(party_id__in=party_ids).update(active=False)
+        from wefocus.apps.timer.models import PomodoroTimer
+        PomodoroTimer.objects.filter(owner_id__in=party_ids).update(active=False)
+        return Response(status=status.HTTP_200_OK, data='1')
 
     def leave_party(self, user_id, party_slug):
         party = self._validate_party(party_slug=party_slug)
