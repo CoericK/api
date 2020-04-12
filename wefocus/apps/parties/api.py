@@ -103,23 +103,25 @@ class PartyManger:
         party = self._validate_party(party_slug=party_slug)
         current_time = datetime.datetime.now().replace(microsecond=0)
 
-        # TODO: atomic lock on party
-        try:
-            member = PartyMember.objects.get(party_id=party.id, user_id=user_id, active=True)
-        except PartyMember.DoesNotExist:
-            raise InvalidMember()
+        # # TODO: atomic lock on party
+        # try:
+        #     member = PartyMember.objects.get(party_id=party.id, user_id=user_id, active=True)
+        # except PartyMember.DoesNotExist:
+        #     raise InvalidMember()
 
-        if member.last_left_at is not None and member.last_left_at > member.last_joined_at:
-            raise InvalidMember()
+        members = PartyMember.objects.filter(party_id=party.id, user_id=user_id, active=True)
+        for member in members:
+            if member.last_left_at is not None and member.last_left_at > member.last_joined_at:
+                raise InvalidMember()
 
-        member.last_left_at = current_time
-        member.save()
+            member.last_left_at = current_time
+            member.save()
 
-        if member.user_id == party.host_user_id:
-            Party.objects.discard(party_id=party.id)
-        else:
-            party.member_count -= 1
-            party.save()
+            if member.user_id == party.host_user_id:
+                Party.objects.discard(party_id=party.id)
+            else:
+                party.member_count -= 1
+                party.save()
 
         # client will not render the party UI if the party member list in the response does not include the user
         return self.get_party_view(user_id=user_id, party_slug=party_slug, party=party)
