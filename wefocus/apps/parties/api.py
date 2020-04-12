@@ -29,7 +29,7 @@ class PartyManger:
 
         return self.get_party_view(user_id=host_user_id, party_slug=party.slug)
 
-    def get_party_view(self, user_id, party_slug, party=None, shallow=False):
+    def get_party_view(self, user_id, party_slug, party=None, timer=None, shallow=False):
         party = party or self._get_party_safe(party_slug=party_slug)
 
         try:
@@ -37,11 +37,11 @@ class PartyManger:
         except PartyMember.DoesNotExist:
             raise InvalidMember()
 
-        timer = None
         members = []
         if not shallow and party:
             timer_manager = TimerManager()
-            timer = timer_manager.get_current_pomodoro_timer(owner_type=TimerOwnerType.PARTY, owner_id=party.id)
+            timer = timer or timer_manager.get_current_pomodoro_timer(owner_type=TimerOwnerType.PARTY,
+                                                                      owner_id=party.id)
 
             members = PartyMember.objects.filter(party_id=party.id, active=True)
 
@@ -53,7 +53,7 @@ class PartyManger:
         return Response(status=status.HTTP_200_OK, data=serializer.data)  # the view
 
     def get_parties(self):
-        parties = Party.objects.filter(active=True, member_count__lt=F('max_member_count'))[:50]    # TODO: get from config
+        parties = Party.objects.filter(active=True, member_count__lt=F('max_member_count'))[:50]  # TODO: get from config
         party_views = [self.get_party_view(user_id=party.host_user_id, party_slug=party.slug, shallow=True)
                        for party in parties]
 
@@ -123,16 +123,16 @@ class PartyManger:
         timer_manager = TimerManager()
         timer = timer_manager.start_pomodoro_timer(owner_type=TimerOwnerType.PARTY, owner_id=party.id)
 
-        return None  # return the party view
+        return self.get_party_view(user_id=user_id, party_slug=party_slug, party=party, timer=timer)
 
     def end_pomodoro_timer(self, user_id, party_slug):
         party = self._validate_party_and_host(user_id=user_id, party_slug=party_slug)
 
         # TODO: atomic lock on party
         timer_manager = TimerManager()
-        timer = timer_manager.end_pomodoro_timer(owner_type=TimerOwnerType.PARTY, owner_id=party.id)
+        timer_manager.end_pomodoro_timer(owner_type=TimerOwnerType.PARTY, owner_id=party.id)
 
-        return None  # return the party view
+        return self.get_party_view(user_id=user_id, party_slug=party_slug, party=party)
 
     ##################################################
     # Internal methods
