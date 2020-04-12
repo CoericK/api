@@ -215,5 +215,5 @@ sentry_sdk.init(
 # Your stuff...
 # ------------------------------------------------------------------------------
 CORS_ORIGIN_WHITELIST = (
-    'app.wefoc.us',
+    'https://app.wefoc.us',
 )
