@@ -9,6 +9,8 @@ from wefocus.apps.parties.models import Party
 from .serializers import PartySerializer
 from .api import PartyManger
 
+import logging
+
 User = get_user_model()
 
 
@@ -16,7 +18,8 @@ def handle_response(response, **kwargs):
     try:
         return response(**kwargs)
     except Exception as e:
-        return Response(status=e.status_code if getattr(e, 'status_code') else status.HTTP_500_INTERNAL_SERVER_ERROR,
+        logging.exception('handle_response - e: %s' % str(e))
+        return Response(status=e.status_code if getattr(e, 'status_code', None) else status.HTTP_500_INTERNAL_SERVER_ERROR,
                         data={'message': str(e)})
 
 
@@ -30,7 +33,17 @@ class PartyViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, UpdateM
 
     @permission_classes([permissions.IsAuthenticated])
     def create(self, request):
-        return handle_response(PartyManger().create_party, host_user_id=request.user.id)
+        return handle_response(PartyManger().create_party,
+                               host_user_id=request.user.id,
+                               )
+
+    @action(detail=False, methods=["GET"])
+    @permission_classes([permissions.IsAuthenticated])
+    def get(self, request):
+        return handle_response(PartyManger().get_party_view,
+                               user_id=request.user.id,
+                               party_slug=request.data.get('slug'),
+                               )
 
     @action(detail=False, methods=["GET"])
     @permission_classes([permissions.IsAuthenticated])
@@ -39,5 +52,52 @@ class PartyViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, UpdateM
 
     @action(detail=False, methods=["POST"])
     @permission_classes([permissions.IsAuthenticated])
+    def join_party(self, request):
+        return handle_response(PartyManger().join_party,
+                               user_id=request.user.id,
+                               party_slug=request.data.get('slug'),
+                               )
+
+    # INTERNAL USE. do not expose when we are done.
+    @action(detail=False, methods=["POST"])
+    @permission_classes([permissions.IsAuthenticated])
     def delete_party(self, request):
-        return handle_response(PartyManger().delete_party, party_slug=request.data['party_slug'])
+        return handle_response(PartyManger().delete_party,
+                               party_slug=request.data.get('slug'),
+                               )
+
+    @action(detail=False, methods=["POST"])
+    @permission_classes([permissions.IsAuthenticated])
+    def leave_party(self, request):
+        return handle_response(PartyManger().leave_party,
+                               user_id=request.user.id,
+                               party_slug=request.data.get('slug'),
+                               )
+
+    @action(detail=False, methods=["POST"])
+    @permission_classes([permissions.IsAuthenticated])
+    def start_pomodoro_timer(self, request):
+        return handle_response(PartyManger().start_pomodoro_timer,
+                               user_id=request.user.id,
+                               party_slug=request.data.get('slug'),
+                               focus_duration=request.data.get('focus_duration'),
+                               break_duration=request.data.get('break_duration'),
+                               )
+
+    @action(detail=False, methods=["POST"])
+    @permission_classes([permissions.IsAuthenticated])
+    def restart_pomodoro_timer(self, request):
+        return handle_response(PartyManger().restart_pomodoro_timer,
+                               user_id=request.user.id,
+                               party_slug=request.data.get('slug'),
+                               focus_duration=request.data.get('focus_duration'),
+                               break_duration=request.data.get('break_duration'),
+                               )
+
+    @action(detail=False, methods=["DELETE"])
+    @permission_classes([permissions.IsAuthenticated])
+    def end_pomodoro_timer(self, request):
+        return handle_response(PartyManger().end_pomodoro_timer,
+                               user_id=request.user.id,
+                               party_slug=request.data.get('slug'),
+                               )
