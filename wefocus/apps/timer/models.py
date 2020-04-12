@@ -48,4 +48,4 @@ class PomodoroTimer(BaseTimer):
 
     class Meta:
         verbose_name_plural = 'pomodoro_timers'
-        index_together = ['owner_type', 'owner_id', 'focusStartsAt', 'active']
+        index_together = ['active', 'owner_type', 'owner_id', 'focus_starts_at']
