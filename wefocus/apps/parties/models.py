@@ -41,7 +41,9 @@ class Party(models.Model):
 
     class Meta:
         verbose_name_plural = 'parties'
-        unique_together = ['jitsi_id', 'slug']
+        unique_together = ['jitsi_id',
+                           'slug']
+        index_together = [['active', 'host_user_id']]
 
 
 class PartyMemberManager(models.Manager):

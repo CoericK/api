@@ -12,6 +12,9 @@ from .exceptions import InvalidHost, InvalidParty, InvalidMember, AlreadyInAPart
 class PartyManger:
 
     def create_party(self, host_user_id):
+        if PartyMember.objects.filter(user_id=user_id, active=True).count() > 0:
+            raise AlreadyInAParty()
+
         time = datetime.datetime.now().replace(microsecond=0)
         party = Party.objects.create_party(
             host_user_id=host_user_id,
