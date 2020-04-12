@@ -16,10 +16,10 @@ class PartyMemberSerializer(serializers.ModelSerializer):
         fields = ['user_id']
 
 
-# class PartyResponseSerializer(serializers.Serializer):
-#     party = PartySerializer(read_only=True)
-#     pomodoro_timer = PomodoroTimerSerializer(read_only=True)
-#     members = PartyMemberSerializer(ready_only=True, many=True)
+class PartyViewSerializer(serializers.Serializer):
+    party = PartySerializer(read_only=True)
+    timer = PomodoroTimerSerializer(read_only=True)
+    members = PartyMemberSerializer(read_only=True, many=True)
 
 
 

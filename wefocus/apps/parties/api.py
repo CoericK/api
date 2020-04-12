@@ -11,6 +11,8 @@ from wefocus.apps.timer.models import TimerOwnerType
 from wefocus.apps.timer.api import TimerManager
 
 from .exceptions import InvalidHost, InvalidParty, InvalidMember, AlreadyInAParty, PartyFull
+from .serializers import PartyViewSerializer
+
 
 
 class PartyManger:
@@ -41,11 +43,14 @@ class PartyManger:
             timer_manager = TimerManager()
             timer = timer_manager.get_current_pomodoro_timer(owner_type=TimerOwnerType.PARTY, owner_id=party.id)
 
-            members = [PartyMember.objects.filter(party_id=party.id, active=True)]
+            members = PartyMember.objects.filter(party_id=party.id, active=True)
 
-        # serializer = PartyResponseSerializer()
-        # return Response(status=status.HTTP_200_OK, data=serializer.data)  # the view
-        return None
+        serializer = PartyViewSerializer({
+            'party': party,
+            'timer': timer,
+            'members': members,
+        })
+        return Response(status=status.HTTP_200_OK, data=serializer.data)  # the view
 
     def get_parties(self):
         parties = Party.objects.filter(active=True, member_count__lt=F('max_member_count'))[:50]    # TODO: get from config
