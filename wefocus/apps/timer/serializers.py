@@ -1,9 +1,9 @@
 from rest_framework import serializers
 
-from wefocus.apps.timer.models import Timer
+from wefocus.apps.timer.models import PomodoroTimer
 
 
-class TimerSerializer(serializers.ModelSerializer):
+class PomodoroTimerSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Timer
-        fields = ['party_id', 'focus_starts_at', 'focus_ends_at', 'break_starts_at', 'break_ends_at']
+        model = PomodoroTimer
+        fields = ['owner_id', 'focus_starts_at', 'focus_ends_at', 'break_starts_at', 'break_ends_at']

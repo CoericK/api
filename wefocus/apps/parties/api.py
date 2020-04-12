@@ -2,6 +2,8 @@ import datetime
 import uuid
 
 from django.db.models import F
+from rest_framework import status
+from rest_framework.response import Response
 
 from .models import Party, PartyMember, PartyMemberRole
 from wefocus.apps.timer.models import TimerOwnerType
@@ -14,13 +16,12 @@ from .exceptions import InvalidHost, InvalidParty, InvalidMember, AlreadyInAPart
 class PartyManger:
 
     def create_party(self, host_user_id):
-        if PartyMember.objects.filter(user_id=user_id, active=True).count() > 0:
+        if PartyMember.objects.filter(user_id=host_user_id, active=True).count() > 0:
             raise AlreadyInAParty()
 
         time = datetime.datetime.now().replace(microsecond=0)
         party = Party.objects.create_party(
             host_user_id=host_user_id,
-            updated_at=time,
             created_at=time,
         )
 
@@ -42,7 +43,9 @@ class PartyManger:
 
             members = [PartyMember.objects.filter(party_id=party.id, active=True)]
 
-        return None  # the view
+        # serializer = PartyResponseSerializer()
+        # return Response(status=status.HTTP_200_OK, data=serializer.data)  # the view
+        return None
 
     def get_parties(self):
         parties = Party.objects.filter(active=True, member_count__lt=F('max_member_count'))[:50]    # TODO: get from config

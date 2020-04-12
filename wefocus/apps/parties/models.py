@@ -62,7 +62,7 @@ class PartyMember(models.Model):
     role = models.IntegerField()
 
     last_joined_at = models.DateTimeField()
-    last_left_at = models.DateTimeField(default=None)
+    last_left_at = models.DateTimeField(default=None, null=True)
 
     active = models.BooleanField(default=True)
 
