@@ -28,6 +28,7 @@ class PartyViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, UpdateM
     queryset = Party.objects.all()
     lookup_field = "slug"
 
+    @permission_classes([permissions.IsAuthenticated])
     def get_queryset(self, *args, **kwargs):
         return self.queryset.filter(id=self.request.data.get("slug"))
 
@@ -37,9 +38,8 @@ class PartyViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, UpdateM
                                host_user_id=request.user.id,
                                )
 
-    @action(detail=False, methods=["GET"])
     @permission_classes([permissions.IsAuthenticated])
-    def get(self, request):
+    def retrieve(self, request, *args, **kwargs):
         return handle_response(PartyManger().get_party_view,
                                user_id=request.user.id,
                                party_slug=request.data.get('slug'),
