@@ -27,15 +27,15 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
 
     @action(detail=False, methods=["POST"])
     def anonymous(self, request):
+        print(request.user)
         if request.user.is_authenticated:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         else:
             random_username = get_random_string(length=32)
-            print(random_username)
             user = User.objects.create(username=random_username, is_temporary=True)
             login(request, user, backend='allauth.account.auth_backends.AuthenticationBackend')
             serializer = UserSerializer(request.user, context={"request": request})
             token, created = Token.objects.get_or_create(user=user)
             return Response({
-                'token': token.key,
+                'key': token.key,
             }, status=status.HTTP_201_CREATED)
