@@ -49,12 +49,13 @@ class PartyManger:
 
             members = PartyMember.objects.filter(party_id=party.id, active=True)
 
-        serializer = PartyViewSerializer({
-            'party': party,
-            'timer': timer,
-            'members': members,
-        })
-        return Response(status=status.HTTP_200_OK, data=serializer.data)
+        response_data = {
+            'party': PartySerializer(party).data,
+            'timer': PomodoroTimerSerializer(timer).data,
+            'members': PartyMemberSerializer(members, many=True).data,
+        }
+
+        return Response(status=status.HTTP_200_OK, data=response_data)
 
     def get_parties(self):
         parties = Party.objects.filter(active=True, member_count__lt=F('max_member_count'))[:50]  # TODO: get from config

@@ -42,7 +42,7 @@ class PartyViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, UpdateM
     def retrieve(self, request, *args, **kwargs):
         return handle_response(PartyManger().get_party_view,
                                user_id=request.user.id,
-                               party_slug=request.data.get('slug'),
+                               party_slug=kwargs.get('slug'),
                                )
 
     @action(detail=False, methods=["GET"])
