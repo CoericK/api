@@ -20,3 +20,5 @@ django-compressor==2.4  # https://github.com/django-compressor/django-compressor
 django-redis==4.11.0  # https://github.com/niwinz/django-redis
 # Django REST Framework
 djangorestframework==3.11.0  # https://github.com/encode/django-rest-framework
+-e git+https://github.com/jazzband/dj-rest-auth.git@275d1c49522996417ff066ab29664daa178c8eab#egg=dj_rest_auth # https://github.com/Tivix/django-rest-auth
+djangorestframework-simplejwt==4.4.0 # https://github.com/SimpleJWT/django-rest-framework-simplejwt/

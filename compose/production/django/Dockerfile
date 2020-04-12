@@ -12,6 +12,7 @@ FROM python:3.7-slim-buster
 ENV PYTHONUNBUFFERED 1
 
 RUN apt-get update \
+  && apt-get install -y git \
   # dependencies for building Python packages
   && apt-get install -y build-essential \
   # psycopg2 dependencies
