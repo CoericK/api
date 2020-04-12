@@ -4,10 +4,10 @@ from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-import uuid
-import hashlib
+from django.utils.crypto import get_random_string
 
 from .serializers import UserSerializer
+from dj_rest_auth.registration import views
 
 User = get_user_model()
 
@@ -30,7 +30,8 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
         if request.user.is_authenticated:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         else:
-            random_username = hashlib.md5(str(uuid.uuid4).encode('utf-8')).hexdigest()
+            random_username = get_random_string(length=32)
+            print(random_username)
             user = User.objects.create(username=random_username, is_temporary=True)
             serializer = UserSerializer(request.user, context={"request": request})
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
