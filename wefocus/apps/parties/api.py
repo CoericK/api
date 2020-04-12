@@ -35,11 +35,11 @@ class PartyManger:
     def get_party_view(self, user_id, party_slug, party=None, timer=None, shallow=False):
         party = party or self._get_party_safe(party_slug=party_slug)
 
-        if party:
-            try:
-                PartyMember.objects.get(party_id=party.id, user_id=user_id, active=True)
-            except PartyMember.DoesNotExist:
-                party = None
+        # if party:
+        #     try:
+        #         PartyMember.objects.get(party_id=party.id, user_id=user_id, active=True)
+        #     except PartyMember.DoesNotExist:
+        #         party = None
 
         members = None
         if not shallow and party:
