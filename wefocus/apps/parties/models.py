@@ -4,7 +4,7 @@ import uuid
 
 
 class PartyManager(models.Manager):
-    def create_party(self, slug, host_user_id, updated_at, created_at):
+    def create_party(self, host_user_id, updated_at, created_at, slug=uuid.uuid4()):
         self.create(
             slug=slug,
             host_user_id=host_user_id,
