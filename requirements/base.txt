@@ -22,4 +22,4 @@ django-redis==4.11.0  # https://github.com/niwinz/django-redis
 djangorestframework==3.11.0  # https://github.com/encode/django-rest-framework
 -e git+https://github.com/jazzband/dj-rest-auth.git@275d1c49522996417ff066ab29664daa178c8eab#egg=dj_rest_auth # https://github.com/Tivix/django-rest-auth
 djangorestframework-simplejwt==4.4.0 # https://github.com/SimpleJWT/django-rest-framework-simplejwt/
-django-cors-headers==0.12  # https://github.com/adamchainz/django-cors-headers
+django-cors-headers==3.2.1  # https://github.com/adamchainz/django-cors-headers
